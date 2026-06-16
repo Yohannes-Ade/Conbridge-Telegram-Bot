@@ -15,7 +15,7 @@ const http = require('http');
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Addis Construction Telegram Bot is running - Healthy\n');
+  res.end('Conbridge Construction Material Telegram Bot is running - Healthy\n');
 }).listen(PORT, '0.0.0.0', () => {
   console.log('Web health-check server bound and listening on port ' + PORT);
 });
@@ -48,7 +48,7 @@ const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL || "YOUR_GOOGLE_APPS_SCRIPT_
 if (bot) {
   // Welcome start trigger
   bot.start((ctx) => {
-    ctx.replyWithMarkdown(`🏗️ *Welcome to the Addis Ababa Construction Supplier Directory Bot!*
+    ctx.replyWithMarkdown(`🏗️ *Welcome to the Conbridge Construction Material Directory Bot!*
 
 Our system serves both Builders and Materials Suppliers. 
 
@@ -58,8 +58,8 @@ Click the menu button below, register your business, publish prices and showcase
 👉 *For Contractors / Buyers:*
 Type your material needs into our interactive interface.
 You can also search *inline* in ANY chat window by typing:
-@AddisConstructionBot cement
-@AddisConstructionBot rebar
+@ConbridgeConstructionBot cement
+@ConbridgeConstructionBot rebar
 
 Enjoy our free directory! 🇪🇹`);
   });
@@ -78,7 +78,7 @@ Enjoy our free directory! 🇪🇹`);
 • Click the Bottom Left *Mini App Menu Button* to launch the directory.
 • Search for wholesalers on the *Directory* screen.
 • Register your business on the *Register Partner* screen to get high-impact visibility on our channels.
-• Use Inline query anytime: Type \`@AddisConstructionBot [product_keyword]\` to view cards on-the-fly!`);
+• Use Inline query anytime: Type \`@ConbridgeConstructionBot [product_keyword]\` to view cards on-the-fly!`);
   });
 
   // Inline queries handle
@@ -130,7 +130,7 @@ ${sup.telegramUsername ? `📱 *Telegram:* @${sup.telegramUsername.replace('@','
           reply_markup: {
             inline_keyboard: [
               [
-                { text: '💬 Chat on Telegram', url: sup.telegramUsername ? `https://t.me/${sup.telegramUsername.replace('@','')}` : `https://t.me/AddisConstructionBot` }
+                { text: '💬 Chat on Telegram', url: sup.telegramUsername ? `https://t.me/${sup.telegramUsername.replace('@','')}` : `https://t.me/ConbridgeConstructionBot` }
               ]
             ]
           }
