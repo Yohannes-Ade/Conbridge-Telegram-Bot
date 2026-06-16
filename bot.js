@@ -49,13 +49,26 @@ const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL ||
                          "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
 if (bot) {
-  // Welcome start trigger with inline main menu launcher
-  bot.start((ctx) => {
-    const rawMiniAppUrl = process.env.MINI_APP_URL || "";
-    const isMockUrl = !rawMiniAppUrl || rawMiniAppUrl.includes("YOUR") || rawMiniAppUrl === "";
-    const launchUrl = isMockUrl ? "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/" : rawMiniAppUrl.trim();
+  // Helper to get robust, secure, production-ready HTTPS Launch URL
+  function getLaunchUrl() {
+    const rawUrl = process.env.MINI_APP_URL || "";
+    if (!rawUrl || rawUrl.includes("YOUR") || rawUrl.trim() === "") {
+      return "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/";
+    }
+    let cleanUrl = rawUrl.trim();
+    if (cleanUrl.startsWith("http://")) {
+      cleanUrl = "https://" + cleanUrl.slice(7);
+    } else if (!cleanUrl.startsWith("https://")) {
+      cleanUrl = "https://" + cleanUrl;
+    }
+    return cleanUrl;
+  }
 
-    ctx.replyWithMarkdown(`🏗️ *Welcome to the Conbridge Construction Material Directory Bot!*
+  // Welcome start trigger with inline main menu launcher
+  bot.start(async (ctx) => {
+    try {
+      const launchUrl = getLaunchUrl();
+      await ctx.replyWithMarkdown(`🏗️ *Welcome to the Conbridge Construction Material Directory Bot!*
 
 Our system serves both Builders and Materials Suppliers. 
 
@@ -68,56 +81,87 @@ Open the interactive interface to browse catalog items, search prices, and conta
 💡 *Inline Search:* Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [material]\` in any chat to pull up supplier cards immediately!
 
 Enjoy our free directory! 🇪🇹`, {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: "🚀 Open Materials Directory", web_app: { url: launchUrl } }
-          ],
-          [
-            { text: "❔ View Guide Menu", callback_data: "show_help" }
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "🚀 Open Materials Directory", web_app: { url: launchUrl } }
+            ],
+            [
+              { text: "❔ View Guide Menu", callback_data: "show_help" }
+            ]
           ]
-        ]
+        }
+      });
+    } catch (err) {
+      console.error("❌ Telegram start command issue:", err.message);
+      try {
+        await ctx.replyWithMarkdown(`🏗️ *Welcome to the Conbridge Construction Material Bot!*
+
+👉 *Suppliers:* Send /register to write your trading card.
+👉 *Buyers:* Send /directory to browse construction stores.
+
+⚠️ *Developer WebApp URL Warning:* Telegram rejected opening the menu because your hosted link is not using secure **HTTPS**. Ensure the URL starts strictly with **https://**.`);
+      } catch (innerErr) {
+        console.error("Default welcome fallback failed:", innerErr.message);
       }
-    });
+    }
   });
 
-  bot.command('register', (ctx) => {
-    const rawMiniAppUrl = process.env.MINI_APP_URL || "";
-    const isMockUrl = !rawMiniAppUrl || rawMiniAppUrl.includes("YOUR") || rawMiniAppUrl === "";
-    const launchUrl = isMockUrl ? "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/" : rawMiniAppUrl.trim();
-    ctx.reply('To register, simply click on the button below or click the bottom-left Menu Button!', {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: "🏗️ Open Registration Portal", web_app: { url: launchUrl } }
+  bot.command('register', async (ctx) => {
+    try {
+      const launchUrl = getLaunchUrl();
+      await ctx.reply('To register, simply click on the button below or click the bottom-left Menu Button!', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "🏗️ Open Registration Portal", web_app: { url: launchUrl } }
+            ]
           ]
-        ]
+        }
+      });
+    } catch (err) {
+      console.error("❌ Telegram register command issue:", err.message);
+      try {
+        await ctx.reply('Please register your construction profile using the bottom-left WebApp Menu Button.');
+      } catch (innerErr) {
+        console.error("Register fallback failed:", innerErr.message);
       }
-    });
+    }
   });
 
-  bot.command('directory', (ctx) => {
-    const rawMiniAppUrl = process.env.MINI_APP_URL || "";
-    const isMockUrl = !rawMiniAppUrl || rawMiniAppUrl.includes("YOUR") || rawMiniAppUrl === "";
-    const launchUrl = isMockUrl ? "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/" : rawMiniAppUrl.trim();
-    ctx.reply('Browse building materials and locate suppliers using our interactive Mini App!', {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: "🔍 Open Materials App", web_app: { url: launchUrl } }
+  bot.command('directory', async (ctx) => {
+    try {
+      const launchUrl = getLaunchUrl();
+      await ctx.reply('Browse building materials and locate suppliers using our interactive Mini App!', {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "🔍 Open Materials App", web_app: { url: launchUrl } }
+            ]
           ]
-        ]
+        }
+      });
+    } catch (err) {
+      console.error("❌ Telegram directory command issue:", err.message);
+      try {
+        await ctx.reply('Please launch the interactive Materials Directory inside the bottom left screen launcher button.');
+      } catch (innerErr) {
+        console.error("Directory fallback failed:", innerErr.message);
       }
-    });
+    }
   });
 
-  bot.command('help', (ctx) => {
-    ctx.replyWithMarkdown(`❔ *How to use the Directory System*
+  bot.command('help', async (ctx) => {
+    try {
+      await ctx.replyWithMarkdown(`❔ *How to use the Directory System*
 
 • Click the Bottom Left *Mini App Menu Button* or use the inline welcome button to launch the directory.
 • Search for wholesalers on the *Directory* screen.
 • Register your business on the *Register Partner* screen to get high-impact visibility on our channels.
 • Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [product_keyword]\` to view cards on-the-fly!`);
+    } catch (err) {
+      console.error("❌ Help trigger help failing:", err.message);
+    }
   });
 
   // Handle callback triggers
