@@ -42,43 +42,99 @@ if (isDummyToken) {
   }
 }
 
-// Google Apps Script URL configuration
-const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL || "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+// Google Apps Script or other middleware database endpoint URL
+const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL || 
+                         process.env.GOOGLE_SHEET_MIDDLEWARE || 
+                         process.env.GOOGLE_SHEETS_URL || 
+                         "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
 if (bot) {
-  // Welcome start trigger
+  // Welcome start trigger with inline main menu launcher
   bot.start((ctx) => {
+    const rawMiniAppUrl = process.env.MINI_APP_URL || "";
+    const isMockUrl = !rawMiniAppUrl || rawMiniAppUrl.includes("YOUR") || rawMiniAppUrl === "";
+    const launchUrl = isMockUrl ? "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/" : rawMiniAppUrl.trim();
+
     ctx.replyWithMarkdown(`🏗️ *Welcome to the Conbridge Construction Material Directory Bot!*
 
 Our system serves both Builders and Materials Suppliers. 
 
 👉 *For Suppliers / Traders:*
-Click the menu button below, register your business, publish prices and showcase products directly!
+Click the button below or use the Bottom-Left Menu Button to register your business, publish prices and showcase products directly!
 
 👉 *For Contractors / Buyers:*
-Type your material needs into our interactive interface.
-You can also search *inline* in ANY chat window by typing:
-@ConbridgeConstructionBot cement
-@ConbridgeConstructionBot rebar
+Open the interactive interface to browse catalog items, search prices, and contact sellers.
 
-Enjoy our free directory! 🇪🇹`);
+💡 *Inline Search:* Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [material]\` in any chat to pull up supplier cards immediately!
+
+Enjoy our free directory! 🇪🇹`, {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "🚀 Open Materials Directory", web_app: { url: launchUrl } }
+          ],
+          [
+            { text: "❔ View Guide Menu", callback_data: "show_help" }
+          ]
+        ]
+      }
+    });
   });
 
   bot.command('register', (ctx) => {
-    ctx.reply('To register, simply click on the Menu Button below or use the Mini App to fill out the Supplier Card Form!');
+    const rawMiniAppUrl = process.env.MINI_APP_URL || "";
+    const isMockUrl = !rawMiniAppUrl || rawMiniAppUrl.includes("YOUR") || rawMiniAppUrl === "";
+    const launchUrl = isMockUrl ? "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/" : rawMiniAppUrl.trim();
+    ctx.reply('To register, simply click on the button below or click the bottom-left Menu Button!', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "🏗️ Open Registration Portal", web_app: { url: launchUrl } }
+          ]
+        ]
+      }
+    });
   });
 
   bot.command('directory', (ctx) => {
-    ctx.reply('Browse materials and locations. Use the Mini App by clicking the bottom menu key!');
+    const rawMiniAppUrl = process.env.MINI_APP_URL || "";
+    const isMockUrl = !rawMiniAppUrl || rawMiniAppUrl.includes("YOUR") || rawMiniAppUrl === "";
+    const launchUrl = isMockUrl ? "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/" : rawMiniAppUrl.trim();
+    ctx.reply('Browse building materials and locate suppliers using our interactive Mini App!', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "🔍 Open Materials App", web_app: { url: launchUrl } }
+          ]
+        ]
+      }
+    });
   });
 
   bot.command('help', (ctx) => {
     ctx.replyWithMarkdown(`❔ *How to use the Directory System*
 
-• Click the Bottom Left *Mini App Menu Button* to launch the directory.
+• Click the Bottom Left *Mini App Menu Button* or use the inline welcome button to launch the directory.
 • Search for wholesalers on the *Directory* screen.
 • Register your business on the *Register Partner* screen to get high-impact visibility on our channels.
-• Use Inline query anytime: Type \`@ConbridgeConstructionBot [product_keyword]\` to view cards on-the-fly!`);
+• Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [product_keyword]\` to view cards on-the-fly!`);
+  });
+
+  // Handle callback triggers
+  bot.on('callback_query', async (ctx) => {
+    if (ctx.callbackQuery.data === 'show_help') {
+      try {
+        await ctx.answerCbQuery();
+        await ctx.replyWithMarkdown(`❔ *How to use the Directory System*
+
+• Click the Bottom Left *Mini App Menu Button* or use the inline welcome button to launch the directory.
+• Search for wholesalers on the *Directory* screen.
+• Register your business on the *Register Partner* screen to get high-impact visibility on our channels.
+• Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [product_keyword]\` to view cards on-the-fly!`);
+      } catch (err) {
+        console.error("Callback handler error:", err.message);
+      }
+    }
   });
 
   // Inline queries handle
