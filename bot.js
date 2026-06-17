@@ -14,7 +14,7 @@ const http = require('http');
 const PORT = process.env.PORT || 3000;
 
 // Initialize Telegraf Bot Token from env or fallback hardcoded template token
-const rawToken = process.env.BOT_TOKEN || "YOUR_TELEGRAM_BOT_TOKEN";
+const rawToken = process.env.BOT_TOKEN || "8989190193:AAH48wySFuH4p4qcpYeQLhkn0q7Ar-bJoC0";
 const cleanToken = rawToken.trim();
 
 const isDummyToken = !cleanToken || 
@@ -39,14 +39,14 @@ if (isDummyToken) {
 const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL || 
                          process.env.GOOGLE_SHEET_MIDDLEWARE || 
                          process.env.GOOGLE_SHEETS_URL || 
-                         "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+                         "https://script.google.com/macros/s/AKfycbyaJnrBf8I7Ky9hnpiyqGpcMW__0zW-dXM0cjyT41dMPSHFg8LmqNwUmIXpt8Qk1zob/exec";
 
 if (bot) {
   // Helper to get robust, secure, production-ready HTTPS Launch URL
   function getLaunchUrl() {
-    const rawUrl = process.env.MINI_APP_URL || "";
+    const rawUrl = process.env.MINI_APP_URL || "https://yohannes-ade.github.io/Conbridge-Material-Directory/";
     if (!rawUrl || rawUrl.includes("YOUR") || rawUrl.trim() === "") {
-      return "https://ConbridgeConstructionBot.github.io/conbridge-material-directory/";
+      return "https://Con_bridgeBot.github.io/conbridge-material-directory/";
     }
     let cleanUrl = rawUrl.trim();
     if (cleanUrl.startsWith("http://")) {
@@ -71,7 +71,7 @@ Click the button below or use the Bottom-Left Menu Button to register your busin
 👉 *For Contractors / Buyers:*
 Open the interactive interface to browse catalog items, search prices, and contact sellers.
 
-💡 *Inline Search:* Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [material]\` in any chat to pull up supplier cards immediately!
+💡 *Inline Search:* Type \`@${ctx.botInfo?.username || 'Con_bridgeBot'} [material]\` in any chat to pull up supplier cards immediately!
 
 Enjoy our free directory! 🇪🇹`, {
         reply_markup: {
@@ -151,7 +151,7 @@ Enjoy our free directory! 🇪🇹`, {
 • Click the Bottom Left *Mini App Menu Button* or use the inline welcome button to launch the directory.
 • Search for wholesalers on the *Directory* screen.
 • Register your business on the *Register Partner* screen to get high-impact visibility on our channels.
-• Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [product_keyword]\` to view cards on-the-fly!`);
+• Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'Con_bridgeBot'} [product_keyword]\` to view cards on-the-fly!`);
     } catch (err) {
       console.error("❌ Help trigger help failing:", err.message);
     }
@@ -167,7 +167,7 @@ Enjoy our free directory! 🇪🇹`, {
 • Click the Bottom Left *Mini App Menu Button* or use the inline welcome button to launch the directory.
 • Search for wholesalers on the *Directory* screen.
 • Register your business on the *Register Partner* screen to get high-impact visibility on our channels.
-• Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'ConbridgeConstructionBot'} [product_keyword]\` to view cards on-the-fly!`);
+• Use Inline query anytime: Type \`@${ctx.botInfo?.username || 'Con_bridgeBot'} [product_keyword]\` to view cards on-the-fly!`);
       } catch (err) {
         console.error("Callback handler error:", err.message);
       }
@@ -223,7 +223,7 @@ ${sup.telegramUsername ? `📱 *Telegram:* @${sup.telegramUsername.replace('@','
           reply_markup: {
             inline_keyboard: [
               [
-                { text: '💬 Chat on Telegram', url: sup.telegramUsername ? `https://t.me/${sup.telegramUsername.replace('@','')}` : `https://t.me/ConbridgeConstructionBot` }
+                { text: '💬 Chat on Telegram', url: sup.telegramUsername ? `https://t.me/${sup.telegramUsername.replace('@','')}` : `https://t.me/Con_bridgeBot` }
               ]
             ]
           }
