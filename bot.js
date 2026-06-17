@@ -11,14 +11,7 @@ const { Telegraf } = require('telegraf');
 const axios = require('axios');
 const http = require('http');
 
-// Simple HTTP server to satisfy Render/Railway port binding health checks
 const PORT = process.env.PORT || 3000;
-http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Conbridge Construction Material Telegram Bot is running - Healthy\n');
-}).listen(PORT, '0.0.0.0', () => {
-  console.log('Web health-check server bound and listening on port ' + PORT);
-});
 
 // Initialize Telegraf Bot Token from env or fallback hardcoded template token
 const rawToken = process.env.BOT_TOKEN || "YOUR_TELEGRAM_BOT_TOKEN";
@@ -257,19 +250,76 @@ ${sup.telegramUsername ? `📱 *Telegram:* @${sup.telegramUsername.replace('@','
     }
   });
 
-  // Launch bot server with robust uncaught promises interception
-  bot.launch()
-    .then(() => {
-      console.log("🚀 Telegram Bot is successfully listening/polling!");
-    })
-    .catch((err) => {
-      console.error("❌ ERROR: Telegram Bot failed to launch polling:", err.message);
-      console.warn("⚠️ Rendering is kept alive to prevent container collapse. Please check your BOT_TOKEN environment variable!");
+  const EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
+
+  if (EXTERNAL_URL) {
+    // Webhook Mode (For zero-downtime, conflict-free hosting on Render)
+    const webhookPath = `/webhook-${cleanToken.slice(-10)}`;
+    const fullWebhookUrl = `${EXTERNAL_URL}${webhookPath}`;
+    
+    const webhookHandler = bot.webhookCallback(webhookPath);
+    
+    const server = http.createServer((req, res) => {
+      if (req.url === webhookPath && req.method === 'POST') {
+        webhookHandler(req, res);
+      } else if (req.url === '/' || req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('Conbridge Construction Material Telegram Bot is running via Webhook! - Healthy\n');
+      } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found\n');
+      }
+    });
+    
+    server.listen(PORT, '0.0.0.0', async () => {
+      console.log(`📡 Web health-check server and webhook bound to port ${PORT}`);
+      try {
+        console.log(`⚙️ Requesting Telegram register webhook URL: ${fullWebhookUrl}`);
+        await bot.telegram.setWebhook(fullWebhookUrl);
+        console.log("✅ Webhook successfully configured in Telegram!");
+      } catch (err) {
+        console.error("❌ Failed to register webhook in Telegram:", err.message);
+      }
     });
 
-  // Enable graceful stop
-  process.once('SIGINT', () => bot.stop('SIGINT'));
-  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+    process.once('SIGINT', () => { server.close(); });
+    process.once('SIGTERM', () => { server.close(); });
+  } else {
+    // Long Polling Mode Fallback (For simple local development or other nodes)
+    const server = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('Conbridge Construction Material Telegram Bot is running via Polling! - Healthy\n');
+    });
+
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log('📡 Web health-check server (Polling mode) listening on port ' + PORT);
+    });
+
+    bot.launch()
+      .then(() => {
+        console.log("🚀 Telegram Bot is successfully listening/polling!");
+      })
+      .catch((err) => {
+        console.error("❌ ERROR: Telegram Bot failed to launch polling:", err.message);
+        console.warn("⚠️ Rendering is kept alive to prevent container collapse. Please check your BOT_TOKEN environment variable!");
+      });
+
+    process.once('SIGINT', () => {
+      bot.stop('SIGINT');
+      server.close();
+    });
+    process.once('SIGTERM', () => {
+      bot.stop('SIGTERM');
+      server.close();
+    });
+  }
 } else {
-  console.log("🛰️ System is running in web-only fallback mode. Define BOT_TOKEN to activate Telegram bot hooks.");
+  // Web Fallback if Bot is not instantiated due to dummy token
+  const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('🛰️ System is running in web-only fallback mode. Define BOT_TOKEN to activate Telegram bot hooks.\n');
+  });
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log("🛰️ System is running in web-only fallback mode on port " + PORT);
+  });
 }
