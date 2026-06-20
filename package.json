@@ -1,5 +1,5 @@
 {
-  "name": "addis-construction-bot",
+  "name": "conbridge-construction-material-bot",
   "version": "1.0.0",
   "description": "Ethiopian Construction Directory Chatbot Backend",
   "main": "bot.js",
